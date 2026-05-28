@@ -1,0 +1,23 @@
+# Swing Trader IDX - Requirements
+# Python >= 3.8
+
+# Core Framework
+streamlit>=1.30.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Data Sources
+yfinance>=0.2.33
+requests>=2.31.0
+
+# Visualization
+plotly>=5.18.0
+
+# Configuration
+python-dotenv>=1.0.0
+
+# Optional: Enhanced features
+ta>=0.11.0  # Technical analysis library
+scipy>=1.11.0  # Scientific computing

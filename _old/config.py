@@ -1,0 +1,8 @@
+API_GOAPI_KEY = "YOUR_GOAPI_KEY"  # nanti isi sendiri
+GOAPI_BASE_URL = "https://api.goapi.io"
+
+DEFAULT_EMA_FAST = 20
+DEFAULT_EMA_SLOW = 50
+DEFAULT_RSI_PERIOD = 14
+DEFAULT_RISK_PER_TRADE = 0.015  # 1.5% dari modal
+LOT_SIZE = 100  # BEI
