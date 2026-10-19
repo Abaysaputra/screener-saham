@@ -18,6 +18,5 @@ plotly>=5.18.0
 # Configuration
 python-dotenv>=1.0.0
 
-# Optional: Enhanced features
-ta>=0.11.0  # Technical analysis library
-scipy>=1.11.0  # Scientific computing
+# Technical indicators are implemented in utils/indicators.py, so the
+# optional ta/scipy packages are intentionally not installed.

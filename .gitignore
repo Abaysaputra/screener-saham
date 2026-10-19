@@ -30,7 +30,6 @@ env.bak/
 venv.bak/
 
 # Streamlit
-.streamlit/
 
 # Environment variables
 .env

@@ -702,7 +702,7 @@ if st.session_state.scan_results is not None:
         # Warnings
         if total_capital_allocated > capital:
             st.warning(f"⚠️ **Peringatan**: Total modal dialokasikan (Rp {total_capital_allocated:,.0f}) "
-                      f"melebihi modal tersedia (Rp {capital:,.0f})")
+            f"melebihi modal tersedia (Rp {capital:,.0f})")
 
 # Info box
 with st.expander("ℹ️ Cara Menggunakan"):

@@ -80,6 +80,50 @@ Aplikasi akan terbuka di browser: `http://localhost:8501`
 
 **Tidak perlu setup API key atau konfigurasi tambahan!** 🎉
 
+## ☁️ Deploy Cepat ke Streamlit Cloud
+
+Opsi ini paling realistis untuk repo saat ini karena aplikasi sudah berbasis Streamlit.
+
+### Syarat minimum
+
+1. Pastikan repo sudah ada di GitHub.
+2. Pastikan file [requirements.txt](requirements.txt) ada dan up to date.
+3. Commit file [\.streamlit/config.toml](.streamlit/config.toml) ke GitHub.
+
+### Langkah deploy
+
+1. Buka Streamlit Community Cloud.
+2. Klik New app.
+3. Pilih repository GitHub ini.
+4. Set main file path ke `Home.py`.
+5. Klik Deploy.
+
+### Catatan penting
+
+- Gunakan `Home.py` sebagai entry point, bukan `run.py`.
+- File `watchlist.txt` dan `trades_journal.csv` saat ini masih memakai storage lokal, jadi data bisa reset saat redeploy.
+- Untuk pemakaian awal, cukup baca data dari watchlist yang sudah ada di repo dan hindari fitur yang menulis file jika Anda belum pindah ke storage eksternal.
+- Kalau `.streamlit/config.toml` belum ikut ke GitHub, tambahkan dulu sebelum deploy.
+
+### Jangan deploy aplikasi Streamlit ini sebagai Vercel Python Function
+
+Aplikasi ini menggunakan server Streamlit yang berjalan terus-menerus, bukan handler HTTP
+serverless. Vercel akan mencoba membundel seluruh dependency Python ke Lambda dan memiliki
+batas bundle 500 MB. Dependency seperti `pandas`, `numpy`, `pyarrow`, `plotly`, dan
+`streamlit` dapat melewati batas tersebut, sehingga build gagal sebelum aplikasi dijalankan.
+
+Gunakan Streamlit Community Cloud untuk deployment seperti pada langkah di atas. Jika Vercel
+harus digunakan, aplikasi perlu diubah menjadi API/serverless function terpisah dan frontend
+Streamlit tidak dapat dipakai apa adanya.
+
+### Checklist sebelum klik Deploy
+
+- [ ] `requirements.txt` lolos install lokal
+- [ ] `Home.py` bisa jalan dengan `streamlit run Home.py`
+- [ ] `.streamlit/config.toml` sudah committed
+- [ ] `watchlist.txt` berisi daftar saham awal yang valid
+- [ ] Tidak ada dependency yang butuh file write persisten untuk alur utama
+
 ## 📁 Struktur Project
 
 ```
