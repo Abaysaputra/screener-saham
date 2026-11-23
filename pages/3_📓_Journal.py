@@ -25,7 +25,16 @@ st.set_page_config(
 
 apply_app_theme()
 
-st.title("📓 Trading Journal")
+st.markdown(
+    """
+    <div class="hero-panel">
+        <div class="status-pill">PERFORMANCE TRACKER &nbsp;•&nbsp; TRADE JOURNAL</div>
+        <h1 style="margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-0.025em;">📓 Trading Journal</h1>
+        <p style="margin:0.5rem 0 0 0;font-size:0.95rem;color:var(--text-secondary);">Lacak setiap trade, analisis equity curve, dan evaluasi performa strategi secara objektif.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Load journal data
 journal_df = load_journal()
@@ -100,7 +109,7 @@ if journal_df.empty:
     st.stop()
 
 # Statistics Section
-st.markdown("### 📊 Overall Statistics")
+st.markdown('<p class="section-label" style="margin-top:0.5rem;">Overall Performance</p>', unsafe_allow_html=True)
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -123,7 +132,7 @@ with col5:
     st.metric("Win/Loss", f"{stats['winning_trades']}/{stats['losing_trades']}")
 
 # Equity Curve
-st.markdown("### 📈 Equity Curve")
+st.markdown('<p class="section-label" style="margin-top:1rem;">Equity Curve</p>', unsafe_allow_html=True)
 
 if "equity_after" in journal_df.columns:
     fig_equity = go.Figure()
@@ -133,23 +142,30 @@ if "equity_after" in journal_df.columns:
         y=journal_df["equity_after"],
         mode='lines+markers',
         name='Equity',
-        line=dict(color='#1f77b4', width=2),
-        marker=dict(size=6),
-        fill='tonexty'
+        line=dict(color='#3B82F6', width=2.5),
+        marker=dict(size=5, color='#60A5FA'),
+        fill='tozeroy',
+        fillcolor='rgba(59,130,246,0.08)'
     ))
     
     fig_equity.update_layout(
-        title="Equity Growth",
-        xaxis_title="Trade Number",
+        title=dict(text="Equity Curve", font=dict(size=14, color='#F8FAFC')),
+        xaxis_title="Trade #",
         yaxis_title="Equity (Rp)",
         hovermode='x unified',
-        height=400
+        height=380,
+        paper_bgcolor='rgba(17,24,39,0.5)',
+        plot_bgcolor='rgba(17,24,39,0.5)',
+        xaxis=dict(gridcolor='rgba(255,255,255,0.05)', color='#94A3B8'),
+        yaxis=dict(gridcolor='rgba(255,255,255,0.05)', color='#94A3B8'),
+        font=dict(color='#94A3B8', family='Plus Jakarta Sans, sans-serif'),
+        margin=dict(l=10, r=10, t=40, b=10),
     )
     
     st.plotly_chart(fig_equity, use_container_width=True)
 
 # Performance Analysis
-st.markdown("### 📊 Performance Analysis")
+st.markdown('<p class="section-label" style="margin-top:1rem;">Performance Analysis</p>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
@@ -161,10 +177,19 @@ with col1:
             x="r_multiple",
             nbins=30,
             title="R-Multiple Distribution",
-            labels={"r_multiple": "R-Multiple", "count": "Frequency"}
+            labels={"r_multiple": "R-Multiple", "count": "Frequency"},
+            color_discrete_sequence=["#3B82F6"],
         )
-        fig_r.add_vline(x=0, line_dash="dash", line_color="red")
-        fig_r.update_layout(height=350)
+        fig_r.add_vline(x=0, line_dash="dash", line_color="#EF4444", line_width=1.5)
+        fig_r.update_layout(
+            height=350,
+            paper_bgcolor='rgba(17,24,39,0.5)', plot_bgcolor='rgba(17,24,39,0.5)',
+            xaxis=dict(gridcolor='rgba(255,255,255,0.05)', color='#94A3B8'),
+            yaxis=dict(gridcolor='rgba(255,255,255,0.05)', color='#94A3B8'),
+            font=dict(color='#94A3B8', family='Plus Jakarta Sans, sans-serif'),
+            title=dict(font=dict(color='#F8FAFC', size=13)),
+            margin=dict(l=10, r=10, t=40, b=10),
+        )
         st.plotly_chart(fig_r, use_container_width=True)
 
 with col2:
@@ -174,43 +199,54 @@ with col2:
         fig_pie.add_trace(go.Pie(
             labels=['Winning Trades', 'Losing Trades'],
             values=[stats["winning_trades"], stats["losing_trades"]],
-            marker_colors=['#2ecc71', '#e74c3c'],
-            hole=0.4
+            marker_colors=['#10B981', '#EF4444'],
+            hole=0.5,
+            textfont=dict(color='#F8FAFC'),
         ))
         fig_pie.update_layout(
-            title="Win/Loss Ratio",
-            height=350
+            title=dict(text="Win/Loss Ratio", font=dict(color='#F8FAFC', size=13)),
+            height=350,
+            paper_bgcolor='rgba(17,24,39,0.5)',
+            font=dict(color='#94A3B8', family='Plus Jakarta Sans, sans-serif'),
+            legend=dict(font=dict(color='#94A3B8')),
+            margin=dict(l=10, r=10, t=40, b=10),
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
 # PnL Over Time
 if "pnl" in journal_df.columns:
-    st.markdown("### 💰 PnL Per Trade")
+    st.markdown('<p class="section-label" style="margin-top:1rem;">PnL Per Trade</p>', unsafe_allow_html=True)
     
     fig_pnl = go.Figure()
     
-    colors = ['green' if x > 0 else 'red' for x in journal_df["pnl"]]
+    colors = ['#10B981' if x > 0 else '#EF4444' for x in journal_df["pnl"]]
     
     fig_pnl.add_trace(go.Bar(
         x=journal_df.index,
         y=journal_df["pnl"],
         marker_color=colors,
+        marker_line_width=0,
         name='PnL'
     ))
     
-    fig_pnl.add_hline(y=0, line_dash="dash", line_color="gray")
+    fig_pnl.add_hline(y=0, line_dash="dash", line_color="rgba(255,255,255,0.2)", line_width=1)
     
     fig_pnl.update_layout(
-        title="Profit/Loss per Trade",
-        xaxis_title="Trade Number",
+        title=dict(text="Profit / Loss per Trade", font=dict(color='#F8FAFC', size=13)),
+        xaxis_title="Trade #",
         yaxis_title="PnL (Rp)",
-        height=400
+        height=380,
+        paper_bgcolor='rgba(17,24,39,0.5)', plot_bgcolor='rgba(17,24,39,0.5)',
+        xaxis=dict(gridcolor='rgba(255,255,255,0.04)', color='#94A3B8'),
+        yaxis=dict(gridcolor='rgba(255,255,255,0.04)', color='#94A3B8'),
+        font=dict(color='#94A3B8', family='Plus Jakarta Sans, sans-serif'),
+        margin=dict(l=10, r=10, t=40, b=10),
     )
     
     st.plotly_chart(fig_pnl, use_container_width=True)
 
 # Trade Details Table
-st.markdown("### 📋 Trade Details")
+st.markdown('<p class="section-label" style="margin-top:1rem;">Trade Log</p>', unsafe_allow_html=True)
 
 # Filter options
 col1, col2, col3 = st.columns(3)

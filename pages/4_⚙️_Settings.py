@@ -16,7 +16,16 @@ st.set_page_config(
 
 apply_app_theme()
 
-st.title("⚙️ Settings & Configuration")
+st.markdown(
+    """
+    <div class="hero-panel">
+        <div class="status-pill">CONFIGURATION &nbsp;•&nbsp; SYSTEM SETTINGS</div>
+        <h1 style="margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-0.025em;">⚙️ Settings & Configuration</h1>
+        <p style="margin:0.5rem 0 0 0;font-size:0.95rem;color:var(--text-secondary);">Kelola watchlist, parameter trading default, koneksi data, dan konfigurasi aplikasi.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Tabs for different settings
 tab1, tab2, tab3, tab4 = st.tabs(["📋 Watchlist", "🎯 Trading Parameters", "🔑 API Keys", "ℹ️ About"])

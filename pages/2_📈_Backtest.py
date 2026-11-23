@@ -25,7 +25,16 @@ st.set_page_config(
 
 apply_app_theme()
 
-st.title("📈 Backtest Strategi Trading")
+st.markdown(
+    """
+    <div class="hero-panel">
+        <div class="status-pill">STRATEGY LAB &nbsp;•&nbsp; HISTORICAL VALIDATION</div>
+        <h1 style="margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-0.025em;">📈 Backtest Strategi Trading</h1>
+        <p style="margin:0.5rem 0 0 0;font-size:0.95rem;color:var(--text-secondary);">Uji strategi EMA crossover pada data historis multi-tahun. Validasi parameter sebelum dipakai di market nyata.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Initialize session state
 if "backtest_results" not in st.session_state:

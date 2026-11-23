@@ -20,12 +20,23 @@ st.set_page_config(
 
 apply_app_theme()
 
+st.markdown("""
+<style>
+.scan-stat-row { display:flex; gap:1rem; margin-bottom:1rem; flex-wrap:wrap; }
+.scan-stat { flex:1; min-width:120px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md,12px); padding:0.9rem 1.1rem; }
+.scan-stat-label { font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted,#64748B); margin-bottom:0.3rem; }
+.scan-stat-val { font-family:var(--mono-font,monospace); font-size:1.4rem; font-weight:600; color:var(--text-primary,#F8FAFC); }
+.scan-stat-val.ok { color:var(--success,#10B981) !important; }
+.scan-stat-val.warn { color:var(--warning,#F59E0B) !important; }
+</style>
+""", unsafe_allow_html=True)
+
 st.markdown(
     """
     <div class="hero-panel">
-        <div class="status-pill">TAHAP 2 • DAILY SIGNAL SCAN</div>
-        <h1 style="margin:0;">🔍 Scan Sinyal BUY Harian</h1>
-        <p style="margin:0.45rem 0 0 0;">Gabungkan kondisi universe, analisis teknikal, dan kualitas fundamental menjadi kandidat trading yang terukur.</p>
+        <div class="status-pill">TAHAP 2 &nbsp;•&nbsp; DAILY SIGNAL SCAN</div>
+        <h1 style="margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-0.025em;">🔍 Scan Sinyal BUY Harian</h1>
+        <p style="margin:0.5rem 0 0 0;font-size:0.95rem;color:var(--text-secondary);">Gabungkan kondisi universe, analisis teknikal, dan kualitas fundamental menjadi kandidat trading yang terukur.</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -36,7 +47,7 @@ if "scan_results" not in st.session_state:
     st.session_state.scan_results = None
 
 # Sidebar configuration
-st.sidebar.header("⚙️ Pengaturan Scan")
+st.sidebar.markdown("### 💰 Modal & Risiko")
 
 modal_per_saham = st.sidebar.number_input(
     "Modal per Saham (Default)",
@@ -524,7 +535,7 @@ if st.session_state.scan_results is not None:
         df_results = pd.DataFrame(results)
         
         # Results table with editable capital
-        st.markdown("### 📋 Hasil Scan (Edit Kolom 'Modal Dialokasikan' sesuai keinginan)")
+        st.markdown('<p class="section-label" style="margin-top:0.5rem;">Hasil Scan — Edit kolom Modal Dialokasikan sesuai kebutuhan</p>', unsafe_allow_html=True)
         
         # Create editable dataframe
         edited_df = st.data_editor(
@@ -585,7 +596,7 @@ if st.session_state.scan_results is not None:
             })
         
         # Summary metrics
-        st.markdown("### 📊 Ringkasan")
+        st.markdown('<p class="section-label" style="margin-top:1rem;">Ringkasan Alokasi</p>', unsafe_allow_html=True)
         col1, col2, col3, col4, col5 = st.columns(5)
         
         with col1:
@@ -601,7 +612,7 @@ if st.session_state.scan_results is not None:
             st.metric("Target R/R", f"{rr_ratio:.1f}", help="R/R ratio yang Anda pilih")
         
         # Show calculated metrics
-        st.markdown("### 📈 Detail Perhitungan")
+        st.markdown('<p class="section-label" style="margin-top:1rem;">Detail Perhitungan Risiko</p>', unsafe_allow_html=True)
         df_calculated = pd.DataFrame(calculated_rows)
         
         # Format display

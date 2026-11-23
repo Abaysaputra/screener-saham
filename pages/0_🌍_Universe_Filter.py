@@ -19,9 +19,9 @@ apply_app_theme()
 st.markdown(
     """
     <div class="hero-panel">
-        <div class="status-pill">TAHAP 1 • MARKET-WIDE FILTER</div>
-        <h1 style="margin:0;">🌍 Universe Filter</h1>
-        <p style="margin:0.45rem 0 0 0;">Pilih emiten berkualitas dari seluruh pasar IDX menggunakan data market yang diperbarui otomatis.</p>
+        <div class="status-pill">TAHAP 1 &nbsp;•&nbsp; MARKET-WIDE FILTER</div>
+        <h1 style="margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-0.025em;">🌍 Universe Filter</h1>
+        <p style="margin:0.5rem 0 0 0;font-size:0.95rem;color:var(--text-secondary);">Pilih emiten berkualitas dari seluruh pasar IDX menggunakan data market yang diperbarui otomatis.</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -55,17 +55,19 @@ if "universe_filter_criteria" not in st.session_state:
 if "auto_refresh_universe" not in st.session_state:
     st.session_state.auto_refresh_universe = True
 
-refresh_col1, refresh_col2 = st.columns([1, 3])
-with refresh_col1:
-    if st.button("🔄 Refresh data realtime", use_container_width=True):
+rc1, rc2 = st.columns([1, 3])
+with rc1:
+    if st.button("🔄 Refresh Realtime", use_container_width=True, type="primary"):
         refresh_live_universe.clear()
         st.session_state.universe_last_refresh = pd.Timestamp.now().strftime("%H:%M:%S")
         st.rerun()
-with refresh_col2:
+with rc2:
     st.session_state.auto_refresh_universe = st.checkbox(
         "Perbarui data otomatis (maks. 5 menit)",
         value=st.session_state.auto_refresh_universe,
+        help="Aktifkan untuk data market terkini setiap 5 menit"
     )
+refresh_col1, refresh_col2 = rc1, rc2
 
 if st.session_state.auto_refresh_universe:
     df_universe = refresh_live_universe()
@@ -95,7 +97,8 @@ if st.session_state.universe_filter_applied and st.session_state.universe_filter
 
     st.session_state.filtered_universe = live_filtered
 
-# Show universe stats
+# ─── Universe Stats ───
+st.markdown('<p class="section-label" style="margin-top:1rem;">Statistik Universe</p>', unsafe_allow_html=True)
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric("Total Saham IDX", len(df_universe))
@@ -106,14 +109,14 @@ with col3:
     if st.session_state.filtered_universe is not None:
         st.metric("Universe Terfilter", len(st.session_state.filtered_universe))
     else:
-        st.metric("Universe Terfilter", "-")
+        st.metric("Universe Terfilter", "—")
 with col4:
     if st.session_state.universe_filter_applied:
-        st.success("✅ Filter Aktif")
+        st.markdown('<div class="callout-tip" style="margin:0;padding:0.65rem 1rem;">✅ &nbsp;<strong>Filter Aktif</strong></div>', unsafe_allow_html=True)
     else:
-        st.info("⚪ Filter Belum Aktif")
+        st.markdown('<div class="callout-info" style="margin:0;padding:0.65rem 1rem;">⬜ &nbsp;Filter Belum Aktif</div>', unsafe_allow_html=True)
 
-st.markdown("---")
+st.markdown("<hr/>", unsafe_allow_html=True)
 
 # Filter Configuration
 st.sidebar.header("⚙️ Konfigurasi Filter Universe")

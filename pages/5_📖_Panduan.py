@@ -17,9 +17,9 @@ apply_app_theme()
 st.markdown(
     """
     <div class="hero-panel">
-        <div class="status-pill">PANDUAN PENGGUNAAN • START HERE</div>
-        <h1 style="margin:0;">Panduan Screener Saham</h1>
-        <p style="margin:0.45rem 0 0 0;">Ikuti lima tahap singkat untuk menyiapkan universe, menjalankan scan, dan mencatat hasil trading.</p>
+        <div class="status-pill">PANDUAN PENGGUNAAN &nbsp;•&nbsp; START HERE</div>
+        <h1 style="margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-0.025em;">📖 Panduan Screener Saham</h1>
+        <p style="margin:0.5rem 0 0 0;font-size:0.95rem;color:var(--text-secondary);">Ikuti lima tahap singkat untuk menyiapkan universe, menjalankan scan, dan mencatat hasil trading.</p>
     </div>
     """,
     unsafe_allow_html=True,

@@ -16,46 +16,53 @@ st.set_page_config(
 
 apply_app_theme()
 
+# ─── Page-specific CSS ───
 st.markdown("""
 <style>
 .hero-title {
-    font-size: 2.45rem;
+    font-size: 2.2rem;
     font-weight: 800;
-    line-height: 1.18;
-    margin: 0;
+    line-height: 1.15;
+    margin: 0.25rem 0 0.6rem 0;
+    letter-spacing: -0.03em;
 }
-
 .hero-subtitle {
-    font-size: 1rem;
-    margin-top: 0.5rem;
-    opacity: 0.92;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    margin: 0;
+    color: var(--text-secondary);
+    max-width: 540px;
 }
-
-.status-pill {
-    display: inline-block;
-    border-radius: 999px;
-    padding: 0.35rem 0.8rem;
-    font-weight: 700;
-    font-size: 0.82rem;
-    margin-bottom: 0.75rem;
-    background: rgba(95, 180, 255, 0.18);
-    border: 1px solid rgba(95, 180, 255, 0.35);
-}
-
-.section-label {
-    font-weight: 800;
-    font-size: 1.08rem;
-    margin-top: 0.15rem;
-    margin-bottom: 0.65rem;
-}
-
 .micro-note {
-    font-size: 0.88rem;
-    opacity: 0.86;
+    font-size: 0.78rem;
+    color: var(--text-muted) !important;
+    margin-top: 0.75rem !important;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+.quick-action-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+}
+.data-badge {
+    font-family: var(--mono-font, monospace);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--bg-card-soft, rgba(255,255,255,0.05));
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    display: inline-block;
+    margin-top: 0.3rem;
 }
 </style>
 """, unsafe_allow_html=True)
 
+# ─── Data ───
 watchlist_count = 0
 watchlist_path = Path("watchlist.txt")
 if watchlist_path.exists():
@@ -64,7 +71,40 @@ if watchlist_path.exists():
 filtered_universe = st.session_state.get("filtered_universe")
 filtered_count = len(filtered_universe) if filtered_universe is not None else 0
 
-st.markdown("<p class='section-label'>Akses Cepat</p>", unsafe_allow_html=True)
+# ─── Hero + Metrics ───
+hero_col, stats_col = st.columns([1.65, 1.0], gap="large")
+
+with hero_col:
+    st.markdown(
+        """
+        <div class="hero-panel">
+            <div class="status-pill">IDX SWING SCANNER &nbsp;•&nbsp; LIVE READY</div>
+            <p class="hero-title">📈 Swing Trading Assistant</p>
+            <p class="hero-subtitle">Platform analisis swing trading profesional dengan alur kerja 2 tahap:
+            <strong>Universe Filter → Scan Harian</strong>. Fokus pada kualitas sinyal,
+            manajemen risiko terukur, dan dokumentasi performa yang terstruktur.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        """<div class="callout-tip" style="margin-top:0;">
+        ✅ &nbsp;<strong>100% Gratis</strong> — Powered by Yahoo Finance. Tanpa API key, langsung siap pakai.
+        </div>""",
+        unsafe_allow_html=True,
+    )
+
+with stats_col:
+    st.markdown('<p class="section-label">Statistik Sesi</p>', unsafe_allow_html=True)
+    m1, m2 = st.columns(2)
+    with m1:
+        st.metric("Watchlist", watchlist_count)
+    with m2:
+        st.metric("Universe", filtered_count if filtered_count else "—")
+    st.metric("Workflow", "2-Stage", delta="Universe → Scan")
+
+# ─── Quick Access ───
+st.markdown('<p class="section-label" style="margin-top:1.5rem;">Akses Cepat</p>', unsafe_allow_html=True)
 quick1, quick2, quick3, quick4 = st.columns(4)
 with quick1:
     if st.button("🌍 Buat Universe", use_container_width=True, type="primary"):
@@ -80,37 +120,19 @@ with quick4:
         st.session_state.guide_step = 0
         st.switch_page("pages/5_📖_Panduan.py")
 
-left, right = st.columns([1.55, 1.0])
+st.markdown("<hr/>", unsafe_allow_html=True)
 
-with left:
-    st.markdown(
-        """
-        <div class="hero-panel">
-            <div class="status-pill">PRO EDITION • MARKET-WIDE SWING SCANNER</div>
-            <p class="hero-title">📈 Swing Trading Assistant - IDX</p>
-            <p class="hero-subtitle">Platform analisis swing trading dengan alur kerja 2 tahap: Universe Filter → Scan Harian.
-            Fokus pada kualitas sinyal, manajemen risiko, dan dokumentasi performa secara terstruktur.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.success("Gratis 100% dengan Yahoo Finance. Tanpa API key, langsung siap pakai.")
+# ─── Feature Cards ───
+st.markdown('<p class="section-label">Fitur Utama</p>', unsafe_allow_html=True)
 
-with right:
-    st.metric("Watchlist Aktif", watchlist_count)
-    st.metric("Filtered Universe", filtered_count if filtered_count else "Belum dibuat")
-    st.metric("Workflow", "2-Stage")
-
-st.markdown("<p class='section-label'>Fitur Utama</p>", unsafe_allow_html=True)
-
-f1, f2, f3, f4 = st.columns(4)
+f1, f2, f3, f4 = st.columns(4, gap="small")
 
 with f1:
     st.markdown(
         """
         <div class="feature-card">
             <h4>🌍 Universe Filter</h4>
-            <p>Screen seluruh IDX dan saring berdasar market cap, volume, harga, serta sektor.</p>
+            <p>Screen seluruh IDX dan saring berdasar market cap, volume, harga, serta sektor secara otomatis.</p>
             <p class="micro-note">Output: universe berkualitas untuk proses scan berikutnya.</p>
         </div>
         """,
@@ -122,7 +144,7 @@ with f2:
         """
         <div class="feature-card">
             <h4>📊 Scan Harian</h4>
-            <p>Filter teknikal dan fundamental untuk menghasilkan sinyal BUY yang lebih selektif.</p>
+            <p>Filter teknikal dan fundamental untuk menghasilkan sinyal BUY yang lebih selektif dan terukur.</p>
             <p class="micro-note">Modal per saham bisa diatur manual sesuai preferensi risiko.</p>
         </div>
         """,
@@ -153,22 +175,24 @@ with f4:
         unsafe_allow_html=True,
     )
 
-st.markdown("---")
-st.markdown("<p class='section-label'>Quick Start Workflow</p>", unsafe_allow_html=True)
+st.markdown("<hr/>", unsafe_allow_html=True)
 
-w1, w2 = st.columns(2)
+# ─── Quick Start Workflow ───
+st.markdown('<p class="section-label">Quick Start Workflow</p>', unsafe_allow_html=True)
+
+w1, w2 = st.columns(2, gap="medium")
 
 with w1:
     st.markdown(
         """
         <div class="workflow-box">
-            <h4>Stage 1 • Universe Filter</h4>
+            <h4>Stage 1 · Universe Filter</h4>
             <ol>
                 <li>Buka menu Universe Filter.</li>
                 <li>Set filter market cap, volume, harga, dan sektor.</li>
-                <li>Klik Terapkan Filter untuk membuat daftar saham terpilih.</li>
+                <li>Klik <strong>Terapkan Filter</strong> untuk membuat daftar saham terpilih.</li>
             </ol>
-            <p class="micro-note">Target output: 20-50 saham yang lebih liquid dan layak dianalisis.</p>
+            <p class="micro-note">Target output: 20–50 saham yang lebih liquid dan layak dianalisis.</p>
         </div>
         """,
         unsafe_allow_html=True,
@@ -178,54 +202,81 @@ with w2:
     st.markdown(
         """
         <div class="workflow-box">
-            <h4>Stage 2 • Scan Harian</h4>
+            <h4>Stage 2 · Scan Harian</h4>
             <ol>
-                <li>Aktifkan opsi Gunakan Filtered Universe.</li>
+                <li>Aktifkan opsi <strong>Gunakan Filtered Universe</strong>.</li>
                 <li>Tentukan parameter teknikal + fundamental.</li>
                 <li>Atur modal dan target risk/reward.</li>
                 <li>Mulai scan untuk menemukan kandidat sinyal BUY.</li>
             </ol>
-            <p class="micro-note">Target output: 5-15 ide trading dengan kualitas sinyal lebih tinggi.</p>
+            <p class="micro-note">Target output: 5–15 ide trading dengan kualitas sinyal lebih tinggi.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-st.info(
-    "Power combo: Universe Filter + Technical Filter + Fundamental Filter untuk menjaga kualitas sinyal tetap premium."
+st.markdown(
+    """<div class="callout-info" style="margin-top:0.5rem;">
+    💡 &nbsp;<strong>Power combo:</strong> Universe Filter + Technical Filter + Fundamental Filter
+    untuk menjaga kualitas sinyal tetap premium.
+    </div>""",
+    unsafe_allow_html=True,
 )
 
-st.markdown("---")
-st.markdown("<p class='section-label'>Data & Dokumentasi</p>", unsafe_allow_html=True)
+st.markdown("<hr/>", unsafe_allow_html=True)
 
+# ─── Data & Docs ───
+st.markdown('<p class="section-label">Data & Dokumentasi</p>', unsafe_allow_html=True)
+
+doc1, doc2 = st.columns([1.2, 1])
+
+with doc1:
+    st.markdown(
+        """
+        <div class="info-panel">
+            <div class="info-title">📡 Sumber Data</div>
+            <ul style="margin:0;padding-left:1.2rem;font-size:0.875rem;line-height:1.75;">
+                <li>Yahoo Finance — data historis multi-tahun, gratis & stabil.</li>
+                <li>Delay ~15–20 menit tidak menjadi kendala untuk swing trading.</li>
+                <li>Historical data tersedia untuk validasi strategi via backtest.</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with doc2:
+    st.markdown(
+        """
+        <div class="info-panel">
+            <div class="info-title">📄 Referensi</div>
+            <ul style="margin:0;padding-left:1.2rem;font-size:0.875rem;line-height:1.9;">
+                <li><a href="./README.md">README.md</a></li>
+                <li><a href="./ARCHITECTURE.md">ARCHITECTURE.md</a></li>
+                <li><a href="./YFINANCE_MIGRATION.md">YFINANCE_MIGRATION.md</a></li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# ─── Footer ───
 st.markdown(
     """
-- Yahoo Finance digunakan sebagai data source utama: gratis, stabil, dan cukup untuk swing trading harian.
-- Historical data multi-tahun tersedia untuk validasi strategi melalui backtest.
-- Delay data sekitar 15-20 menit umumnya tidak menjadi kendala untuk gaya trading swing.
-
-Baca dokumentasi:
-- [README.md](./README.md)
-- [YFINANCE_MIGRATION.md](./YFINANCE_MIGRATION.md)
-- [ARCHITECTURE.md](./ARCHITECTURE.md)
-"""
-)
-
-st.markdown(
-    """
-    <div class="footer-note" style="padding:1rem 0 0.25rem 0;">
-        <small>Dibuat dengan Streamlit & Yahoo Finance | © 2026 Swing Trader IDX</small><br>
-        <small>Disclaimer: aplikasi ini untuk edukasi. Selalu lakukan riset mandiri sebelum trading.</small>
+    <div class="footer-note">
+        Dibuat dengan Streamlit &amp; Yahoo Finance &nbsp;|&nbsp; © 2026 Swing Trader IDX<br>
+        <span style="opacity:0.6;">Disclaimer: aplikasi ini untuk edukasi. Selalu lakukan riset mandiri sebelum trading.</span>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
+# ─── Sidebar Content ───
 with st.sidebar:
-    st.markdown("### 🚀 Navigation")
+    st.markdown("### 🧭 Navigation")
     st.markdown(
         """
-- Home
+- 🏠 Home
 - 🌍 Universe Filter
 - 📊 Scan Harian
 - 📈 Backtest
@@ -234,19 +285,19 @@ with st.sidebar:
 """
     )
 
-    st.markdown("### 💡 Waktu Scan Disarankan")
+    st.markdown("### ⏰ Waktu Scan Optimal")
     st.markdown(
         """
-- 15:30-16:00 WIB (menjelang close)
-- 16:00-17:00 WIB (setelah close)
+- **15:30 – 16:00** WIB (menjelang close)
+- **16:00 – 17:00** WIB (setelah close)
 """
     )
 
-    st.markdown("### 🎯 Strategi Modal")
+    st.markdown("### 🎯 Tips Modal")
     st.markdown(
         """
 - Diversifikasi ke beberapa saham
-- Prioritaskan kandidat R/R di atas 2
-- Sisakan 10-20% dana untuk fleksibilitas
+- Prioritaskan R/R ≥ 2
+- Sisakan 10–20% dana cadangan
 """
     )
