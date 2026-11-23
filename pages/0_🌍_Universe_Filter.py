@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 from utils.theme import apply_app_theme
+from core.data import refresh_live_universe
 
 st.set_page_config(
     page_title="Universe Filter - Swing Trader",
@@ -15,9 +16,16 @@ st.set_page_config(
 
 apply_app_theme()
 
-st.title("🌍 Universe Filter - Market-Wide Screener")
-st.markdown("**Tahap 1**: Filter seluruh saham IDX untuk membuat universe berkualitas")
-st.markdown("**Tahap 2**: Scan Harian akan berjalan pada universe terfilter")
+st.markdown(
+    """
+    <div class="hero-panel">
+        <div class="status-pill">TAHAP 1 • MARKET-WIDE FILTER</div>
+        <h1 style="margin:0;">🌍 Universe Filter</h1>
+        <p style="margin:0.45rem 0 0 0;">Pilih emiten berkualitas dari seluruh pasar IDX menggunakan data market yang diperbarui otomatis.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Load IDX universe
 @st.cache_data
@@ -40,14 +48,52 @@ if "filtered_universe" not in st.session_state:
     st.session_state.filtered_universe = None
 if "universe_filter_applied" not in st.session_state:
     st.session_state.universe_filter_applied = False
+if "universe_filter_criteria" not in st.session_state:
+    st.session_state.universe_filter_criteria = None
 
 # Load universe
-df_universe = load_idx_universe()
+if "auto_refresh_universe" not in st.session_state:
+    st.session_state.auto_refresh_universe = True
+
+refresh_col1, refresh_col2 = st.columns([1, 3])
+with refresh_col1:
+    if st.button("🔄 Refresh data realtime", use_container_width=True):
+        refresh_live_universe.clear()
+        st.session_state.universe_last_refresh = pd.Timestamp.now().strftime("%H:%M:%S")
+        st.rerun()
+with refresh_col2:
+    st.session_state.auto_refresh_universe = st.checkbox(
+        "Perbarui data otomatis (maks. 5 menit)",
+        value=st.session_state.auto_refresh_universe,
+    )
+
+if st.session_state.auto_refresh_universe:
+    df_universe = refresh_live_universe()
+else:
+    df_universe = load_idx_universe()
 
 if df_universe is None:
     st.error("❌ File `idx_universe.csv` tidak ditemukan!")
     st.info("💡 Buat file `idx_universe.csv` dengan kolom: Symbol, Name, Sector, MarketCap, AvgVolume, LastPrice")
     st.stop()
+
+# Automatically recompute the active filtered universe after live data refresh.
+if st.session_state.universe_filter_applied and st.session_state.universe_filter_criteria:
+    criteria = st.session_state.universe_filter_criteria
+    live_filtered = df_universe.copy()
+
+    if criteria["use_mcap_filter"] and criteria["min_market_cap"]:
+        live_filtered = live_filtered[live_filtered['MarketCap'] >= criteria["min_market_cap"]]
+    if criteria["use_volume_filter"] and criteria["min_volume"]:
+        live_filtered = live_filtered[live_filtered['AvgVolume'] >= criteria["min_volume"]]
+    if criteria["use_price_filter"] and criteria["min_price"]:
+        live_filtered = live_filtered[live_filtered['LastPrice'] >= criteria["min_price"]]
+        if criteria["max_price"]:
+            live_filtered = live_filtered[live_filtered['LastPrice'] <= criteria["max_price"]]
+    if criteria["use_sector_filter"] and criteria["selected_sectors"]:
+        live_filtered = live_filtered[live_filtered['Sector'].isin(criteria["selected_sectors"])]
+
+    st.session_state.filtered_universe = live_filtered
 
 # Show universe stats
 col1, col2, col3, col4 = st.columns(4)
@@ -184,6 +230,7 @@ with col2:
     if st.button("🔄 Reset", use_container_width=True):
         st.session_state.filtered_universe = None
         st.session_state.universe_filter_applied = False
+        st.session_state.universe_filter_criteria = None
         st.rerun()
 
 # Apply filters
@@ -212,6 +259,17 @@ if apply_filter:
         # Store in session state
         st.session_state.filtered_universe = filtered
         st.session_state.universe_filter_applied = True
+        st.session_state.universe_filter_criteria = {
+            "use_mcap_filter": use_mcap_filter,
+            "min_market_cap": min_market_cap,
+            "use_volume_filter": use_volume_filter,
+            "min_volume": min_volume,
+            "use_price_filter": use_price_filter,
+            "min_price": min_price,
+            "max_price": max_price,
+            "use_sector_filter": use_sector_filter,
+            "selected_sectors": selected_sectors,
+        }
         
         st.success(f"✅ Filter berhasil! {len(filtered)} saham dari {len(df_universe)} saham lolos filter")
         st.rerun()
@@ -431,7 +489,7 @@ with st.expander("ℹ️ Cara Menggunakan Universe Filter"):
     
     ### 💡 Tips:
     
-    - **Update idx_universe.csv** secara berkala dengan data terbaru
+    - **Gunakan Refresh data realtime** atau biarkan pembaruan otomatis maksimal 5 menit
     - **Mulai konservatif** (filter ketat), relaksasi bertahap
     - **Review distribusi sektor** untuk pastikan diversifikasi
     - **Download filtered universe** untuk referensi

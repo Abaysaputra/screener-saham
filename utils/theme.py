@@ -5,6 +5,126 @@ Global app theme utilities for professional Streamlit UI.
 import streamlit as st
 
 
+ONBOARDING_STEPS = [
+    {
+        "icon": "1",
+        "eyebrow": "Selamat datang",
+        "title": "Mulai dari universe yang relevan",
+        "description": (
+            "Screener akan mencari emiten IDX secara otomatis. Anda hanya perlu "
+            "memilih kriteria kualitas, likuiditas, harga, dan sektor."
+        ),
+        "tip": "Tidak perlu mengisi kode saham satu per satu.",
+    },
+    {
+        "icon": "2",
+        "eyebrow": "Langkah 1",
+        "title": "Buat Filter Universe",
+        "description": (
+            "Buka Universe Filter, atur market cap minimum, volume harian, "
+            "rentang harga, lalu pilih sektor apabila diperlukan."
+        ),
+        "tip": "Klik Terapkan Filter untuk menyimpan daftar emiten yang lolos.",
+    },
+    {
+        "icon": "3",
+        "eyebrow": "Langkah 2",
+        "title": "Atur sumber dan profil risiko",
+        "description": (
+            "Di Scan Harian, gunakan Filtered Universe. Lalu atur periode scan, "
+            "maksimum RSI, R/R target, serta modal trading."
+        ),
+        "tip": "Mulai dengan kriteria konservatif, lalu evaluasi hasilnya.",
+    },
+    {
+        "icon": "4",
+        "eyebrow": "Langkah 3",
+        "title": "Jalankan scan dan pilih sinyal",
+        "description": (
+            "Klik Mulai Scan untuk memeriksa emiten secara otomatis. "
+            "Tinjau sinyal BUY, harga entry, stop loss, dan target profit."
+        ),
+        "tip": "Gunakan chart dan kondisi pasar sebagai konfirmasi tambahan.",
+    },
+    {
+        "icon": "5",
+        "eyebrow": "Langkah terakhir",
+        "title": "Catat dan evaluasi trade",
+        "description": (
+            "Gunakan Journal untuk mencatat eksekusi, hasil, serta win rate. "
+            "Gunakan Backtest untuk menguji strategi sebelum dipakai."
+        ),
+        "tip": "Panduan ini selalu bisa dibuka kembali dari sidebar.",
+    },
+]
+
+
+def render_onboarding() -> None:
+    """Show a first-run, dismissible onboarding dialog."""
+    if "onboarding_complete" not in st.session_state:
+        st.session_state.onboarding_complete = False
+    if "onboarding_step" not in st.session_state:
+        st.session_state.onboarding_step = 0
+
+    if not st.session_state.onboarding_complete:
+        st.session_state.onboarding_open = True
+    if not st.session_state.get("onboarding_open", False):
+        return
+    if not hasattr(st, "dialog"):
+        return
+
+    @st.dialog("Panduan Penggunaan Screener", width="large")
+    def onboarding_dialog():
+        step = st.session_state.onboarding_step
+        item = ONBOARDING_STEPS[step]
+
+        dot_labels = "".join(
+            f'<span class="guide-dot {"guide-dot-active" if i == step else ""}{" guide-dot-done" if i < step else ""}">{i + 1}</span>'
+            for i in range(len(ONBOARDING_STEPS))
+        )
+        st.markdown(
+            f'<div class="guide-progress">{dot_labels}</div>',
+            unsafe_allow_html=True,
+        )
+        st.progress((step + 1) / len(ONBOARDING_STEPS))
+        st.markdown(
+            f"""
+            <div class="onboarding-shell">
+                <div class="onboarding-step-badge">{item["icon"]}</div>
+                <p class="onboarding-eyebrow">{item["eyebrow"]}</p>
+                <h2 class="onboarding-title">{item["title"]}</h2>
+                <p class="onboarding-description">{item["description"]}</p>
+                <div class="onboarding-tip">💡 {item["tip"]}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        left, middle, right = st.columns(3)
+        with left:
+            if st.button("Lewati", key="onboarding_skip", use_container_width=True):
+                st.session_state.onboarding_complete = True
+                st.session_state.onboarding_open = False
+                st.rerun()
+        with middle:
+            if step > 0:
+                if st.button("Kembali", key="onboarding_back", use_container_width=True):
+                    st.session_state.onboarding_step = max(0, step - 1)
+                    st.rerun()
+        with right:
+            if step < len(ONBOARDING_STEPS) - 1:
+                if st.button("Selanjutnya", key="onboarding_next", type="primary", use_container_width=True):
+                    st.session_state.onboarding_step = step + 1
+                    st.rerun()
+            else:
+                if st.button("Mulai Screener", key="onboarding_finish", type="primary", use_container_width=True):
+                    st.session_state.onboarding_complete = True
+                    st.session_state.onboarding_open = False
+                    st.rerun()
+
+    onboarding_dialog()
+
+
 def _build_theme_css(is_dark: bool) -> str:
     if is_dark:
         return """
@@ -39,6 +159,51 @@ def _build_theme_css(is_dark: bool) -> str:
         section[data-testid="stSidebar"] {
             background: linear-gradient(180deg, rgba(9, 16, 27, 0.95), rgba(5, 10, 18, 0.92));
             border-right: 1px solid var(--border-color);
+        }
+
+        [data-testid="stDialog"],
+        [data-testid="stDialog"] > div,
+        [role="dialog"] {
+            background: #111927 !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        [role="dialog"] h1,
+        [role="dialog"] h2,
+        [role="dialog"] h3,
+        [role="dialog"] p,
+        [role="dialog"] li,
+        [role="dialog"] span,
+        [role="dialog"] strong,
+        [data-testid="stDialog"] h1,
+        [data-testid="stDialog"] h2,
+        [data-testid="stDialog"] h3,
+        [data-testid="stDialog"] p,
+        [data-testid="stDialog"] li,
+        [data-testid="stDialog"] strong {
+            color: var(--text-secondary) !important;
+        }
+
+        [role="dialog"] h1,
+        [role="dialog"] h2,
+        [role="dialog"] h3,
+        [data-testid="stDialog"] h1,
+        [data-testid="stDialog"] h2,
+        [data-testid="stDialog"] h3,
+        [role="dialog"] .onboarding-title,
+        [data-testid="stDialog"] .onboarding-title {
+            color: var(--text-primary) !important;
+        }
+
+        [role="dialog"] .onboarding-description,
+        [role="dialog"] .onboarding-tip,
+        [data-testid="stDialog"] .onboarding-description,
+        [data-testid="stDialog"] .onboarding-tip {
+            color: var(--text-secondary) !important;
+            background: var(--bg-card-soft) !important;
+            text-align: center !important;
+            text-wrap: balance;
         }
 
         h1, h2, h3, h4 {
@@ -184,6 +349,50 @@ def _build_theme_css(is_dark: bool) -> str:
         border-right: 1px solid var(--border-color);
     }
 
+    [data-testid="stDialog"],
+    [data-testid="stDialog"] > div,
+    [role="dialog"] {
+        background: #ffffff !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+    }
+
+    [role="dialog"] h1,
+    [role="dialog"] h2,
+    [role="dialog"] h3,
+    [role="dialog"] p,
+    [role="dialog"] li,
+    [role="dialog"] strong,
+    [data-testid="stDialog"] h1,
+    [data-testid="stDialog"] h2,
+    [data-testid="stDialog"] h3,
+    [data-testid="stDialog"] p,
+    [data-testid="stDialog"] li,
+    [data-testid="stDialog"] strong {
+        color: var(--text-secondary) !important;
+    }
+
+    [role="dialog"] h1,
+    [role="dialog"] h2,
+    [role="dialog"] h3,
+    [data-testid="stDialog"] h1,
+    [data-testid="stDialog"] h2,
+    [data-testid="stDialog"] h3,
+    [role="dialog"] .onboarding-title,
+    [data-testid="stDialog"] .onboarding-title {
+        color: var(--text-primary) !important;
+    }
+
+    [role="dialog"] .onboarding-description,
+    [role="dialog"] .onboarding-tip,
+    [data-testid="stDialog"] .onboarding-description,
+    [data-testid="stDialog"] .onboarding-tip {
+        color: var(--text-secondary) !important;
+        background: var(--bg-card-soft) !important;
+        text-align: center !important;
+        text-wrap: balance;
+    }
+
     h1, h2, h3, h4 {
         color: var(--text-primary) !important;
         letter-spacing: -0.02em;
@@ -313,4 +522,144 @@ def apply_app_theme() -> bool:
         st.markdown("---")
 
     st.markdown(f"<style>{_build_theme_css(st.session_state.dark_mode)}</style>", unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+    .block-container {
+        max-width: 1180px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
+    [data-testid="stDataFrame"] {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+    [data-testid="stMetric"] {
+        box-shadow: 0 10px 24px rgba(15, 49, 96, 0.08);
+    }
+    [data-testid="stExpander"] {
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        background: var(--bg-card);
+        overflow: hidden;
+    }
+    [data-testid="stProgress"] > div > div > div > div {
+        background: linear-gradient(90deg, var(--accent), var(--success));
+    }
+    .onboarding-shell {
+        min-height: 240px;
+        text-align: center;
+        padding: 0.4rem 1.5rem 0.8rem 1.5rem;
+    }
+    .onboarding-step-badge {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 0.8rem auto;
+        display: grid;
+        place-items: center;
+        border-radius: 18px;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        box-shadow: 0 12px 26px rgba(47, 111, 255, 0.28);
+    }
+    .onboarding-eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.72rem !important;
+        font-weight: 800;
+        color: var(--accent) !important;
+        margin-bottom: 0.35rem !important;
+    }
+    .onboarding-title {
+        margin: 0 0 0.75rem 0;
+        font-size: 1.65rem;
+    }
+    .onboarding-description {
+        max-width: 620px;
+        margin: 0 auto 1rem auto;
+        line-height: 1.65;
+        font-size: 0.98rem;
+        text-align: center;
+        text-wrap: balance;
+        color: var(--text-secondary) !important;
+    }
+    .onboarding-tip {
+        max-width: 620px;
+        margin: 0 auto;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card-soft);
+        text-align: center;
+        color: var(--text-secondary) !important;
+    }
+    .guide-progress {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        margin: 0.15rem 0 0.8rem 0;
+    }
+    .guide-dot {
+        width: 30px;
+        height: 30px;
+        display: inline-grid;
+        place-items: center;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-secondary) !important;
+        font-size: 0.78rem;
+        font-weight: 800;
+    }
+    .guide-dot-active {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        border-color: transparent;
+        box-shadow: 0 8px 18px rgba(47, 111, 255, 0.25);
+    }
+    .guide-dot-done {
+        color: var(--success) !important;
+        border-color: var(--success);
+    }
+    .guide-content-card {
+        min-height: 220px;
+        box-sizing: border-box;
+        border-radius: 16px;
+        padding: 1.35rem 1.5rem;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        box-shadow: 0 12px 26px rgba(15, 49, 96, 0.08);
+    }
+    .guide-card-icon {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 0.8rem;
+        border-radius: 15px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card-soft);
+        font-size: 1.45rem;
+    }
+    .guide-description {
+        max-width: 700px;
+        line-height: 1.7;
+        font-size: 1rem;
+        text-align: center;
+        text-wrap: balance;
+        color: var(--text-secondary) !important;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .footer-note {
+        text-align: center;
+        color: var(--text-secondary) !important;
+        opacity: 0.88;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    render_onboarding()
     return st.session_state.dark_mode

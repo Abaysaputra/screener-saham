@@ -64,6 +64,22 @@ if watchlist_path.exists():
 filtered_universe = st.session_state.get("filtered_universe")
 filtered_count = len(filtered_universe) if filtered_universe is not None else 0
 
+st.markdown("<p class='section-label'>Akses Cepat</p>", unsafe_allow_html=True)
+quick1, quick2, quick3, quick4 = st.columns(4)
+with quick1:
+    if st.button("🌍 Buat Universe", use_container_width=True, type="primary"):
+        st.switch_page("pages/0_🌍_Universe_Filter.py")
+with quick2:
+    if st.button("🔍 Jalankan Scan", use_container_width=True):
+        st.switch_page("pages/1_📊_Scan_Harian.py")
+with quick3:
+    if st.button("📓 Buka Journal", use_container_width=True):
+        st.switch_page("pages/3_📓_Journal.py")
+with quick4:
+    if st.button("📖 Panduan", use_container_width=True):
+        st.session_state.guide_step = 0
+        st.switch_page("pages/5_📖_Panduan.py")
+
 left, right = st.columns([1.55, 1.0])
 
 with left:
@@ -197,7 +213,7 @@ Baca dokumentasi:
 
 st.markdown(
     """
-    <div style='text-align:center; padding:1rem 0 0.25rem 0; opacity:0.88;'>
+    <div class="footer-note" style="padding:1rem 0 0.25rem 0;">
         <small>Dibuat dengan Streamlit & Yahoo Finance | © 2026 Swing Trader IDX</small><br>
         <small>Disclaimer: aplikasi ini untuk edukasi. Selalu lakukan riset mandiri sebelum trading.</small>
     </div>

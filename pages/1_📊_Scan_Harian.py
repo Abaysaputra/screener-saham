@@ -5,7 +5,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-from core.data import get_daily_history_for_scan, load_watchlist, normalize_symbol, merge_watchlist_and_universe
+from core.data import get_daily_history_for_scan, load_watchlist, load_idx_universe, normalize_symbol, merge_watchlist_and_universe
 from core.config import Config
 from utils.strategy import generate_signals
 from utils.risk import position_size, calculate_stop_loss, calculate_take_profit
@@ -20,7 +20,16 @@ st.set_page_config(
 
 apply_app_theme()
 
-st.title("🔍 Scan Sinyal BUY Harian")
+st.markdown(
+    """
+    <div class="hero-panel">
+        <div class="status-pill">TAHAP 2 • DAILY SIGNAL SCAN</div>
+        <h1 style="margin:0;">🔍 Scan Sinyal BUY Harian</h1>
+        <p style="margin:0.45rem 0 0 0;">Gabungkan kondisi universe, analisis teknikal, dan kualitas fundamental menjadi kandidat trading yang terukur.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Initialize session state
 if "scan_results" not in st.session_state:
@@ -263,8 +272,8 @@ st.sidebar.markdown("### 🎯 Sumber Data Scan")
 
 use_universe = st.sidebar.checkbox(
     "Gunakan Filtered Universe",
-    value=False,
-    help="Gunakan hasil filter dari Universe Filter. Jika tidak aktif, gunakan watchlist.txt"
+    value=True,
+    help="Gunakan hasil filter otomatis dari Universe Filter. Jika tidak aktif, gunakan watchlist.txt"
 )
 
 if use_universe:
@@ -283,9 +292,10 @@ if use_universe:
     else:
         st.sidebar.warning("⚠️ Filtered Universe belum ada!")
         st.sidebar.info("💡 Buka **Universe Filter** dulu untuk membuat filtered universe")
-        watchlist = load_watchlist()  # Fallback
+        full_universe = load_idx_universe()
+        watchlist = full_universe['Symbol'].tolist() if not full_universe.empty else []
         if watchlist:
-            st.sidebar.info(f"↩️ Menggunakan watchlist.txt ({len(watchlist)} saham)")
+            st.sidebar.info(f"↩️ Menggunakan seluruh IDX universe ({len(watchlist)} saham)")
 else:
     # Load watchlist
     watchlist = load_watchlist()

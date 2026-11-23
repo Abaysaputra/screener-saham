@@ -314,6 +314,79 @@ def load_idx_universe() -> pd.DataFrame:
         return pd.DataFrame()
 
 
+@st.cache_data(ttl=300)
+def refresh_live_universe() -> pd.DataFrame:
+    """
+    Refresh universe fields with live Yahoo Finance market data.
+
+    The CSV remains the symbol baseline, while MarketCap, AvgVolume, and
+    LastPrice are recalculated automatically for the real-time view.
+    """
+    base_df = load_idx_universe()
+    if base_df.empty:
+        return base_df
+
+    refreshed = base_df.copy()
+    symbols = {
+        str(symbol).strip().upper(): normalize_symbol(str(symbol).strip())
+        for symbol in refreshed['Symbol'].dropna()
+        if str(symbol).strip()
+    }
+    yf_symbols = list(symbols.values())
+
+    try:
+        history = yf.download(
+            yf_symbols,
+            period="1mo",
+            interval="1d",
+            progress=False,
+            threads=True,
+            auto_adjust=False,
+        )
+
+        for base_symbol, yf_symbol in symbols.items():
+            try:
+                if history.empty:
+                    break
+
+                if isinstance(history.columns, pd.MultiIndex):
+                    if yf_symbol in history.columns.get_level_values(1):
+                        stock_history = history.xs(yf_symbol, axis=1, level=1)
+                    else:
+                        continue
+                else:
+                    stock_history = history
+
+                if stock_history.empty:
+                    continue
+
+                if 'Close' in stock_history.columns:
+                    last_price = float(stock_history['Close'].dropna().iloc[-1])
+                    refreshed.loc[refreshed['Symbol'].str.upper() == base_symbol, 'LastPrice'] = last_price
+
+                if 'Volume' in stock_history.columns:
+                    avg_volume = float(stock_history['Volume'].dropna().tail(20).mean())
+                    refreshed.loc[refreshed['Symbol'].str.upper() == base_symbol, 'AvgVolume'] = avg_volume
+
+                ticker = yf.Ticker(yf_symbol)
+                fast_info = ticker.fast_info
+                market_cap = getattr(fast_info, 'market_cap', None)
+                if market_cap is not None:
+                    refreshed.loc[refreshed['Symbol'].str.upper() == base_symbol, 'MarketCap'] = float(market_cap)
+            except Exception as symbol_error:
+                logger.warning(f"Could not refresh {base_symbol}: {symbol_error}")
+
+        refreshed['MarketCap'] = pd.to_numeric(refreshed['MarketCap'], errors='coerce')
+        refreshed['AvgVolume'] = pd.to_numeric(refreshed['AvgVolume'], errors='coerce')
+        refreshed['LastPrice'] = pd.to_numeric(refreshed['LastPrice'], errors='coerce')
+        logger.info(f"Refreshed {len(refreshed)} IDX universe records")
+        return refreshed
+
+    except Exception as e:
+        logger.error(f"Could not refresh live universe: {str(e)}")
+        return base_df
+
+
 def get_universe_symbols(filtered_df: Optional[pd.DataFrame] = None) -> list:
     """
     Get list of symbols from filtered universe or full universe

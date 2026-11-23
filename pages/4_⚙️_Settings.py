@@ -407,7 +407,7 @@ with tab4:
 # Footer
 st.markdown("---")
 st.markdown("""
-    <div style='text-align: center; color: #666; padding: 1rem;'>
+<div class="footer-note" style="padding: 1rem;">
         <p>© 2026 Swing Trader IDX | Made with ❤️ using Streamlit</p>
     </div>
 """, unsafe_allow_html=True)
